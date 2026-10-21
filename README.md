@@ -137,10 +137,38 @@ src/
 
 ## Co zrobiłbym przy większej ilości czasu
 
-- **Testy E2E (Playwright)** w prawdziwej przeglądarce: pełny przepływ (wklejenie JSON → drzewo → szczegóły), odświeżenie strony z wynikami wyszukiwania, deep link, klawiatura, duże drzewo oraz test dostępności `@axe-core/playwright`.
-- **Docker:** wieloetapowy `Dockerfile` (build w Node, serwowanie przez nginx z `try_files $uri /index.html`, aby deep linki nie dawały 404) i `docker-compose.yml`. W CI: budowanie obrazu i testy E2E na kontenerze.
-- **Web Worker** do parsowania i indeksowania, aby interfejs nie zatrzymywał się przy dużych plikach.
-- **IndexedDB zamiast `localStorage`**, aby duże drzewa przetrwały odświeżenie strony.
+### Interfejs (UI/UX)
+
+- **Motyw jasny i ciemny** z przełącznikiem w `AppBar`. Domyślnie motyw z ustawień systemu (`prefers-color-scheme`), wybór zapisany w przeglądarce.
+- **Dopracowany design**, aby praca była łatwiejsza i przyjemniejsza: panel boczny z drzewem i szczegóły obok (widok dwukolumnowy zamiast przechodzenia między stronami), ikony według typu pliku, przeciąganie pliku na całą stronę, lepszy widok na telefonie.
+- **Dashboard** ze statystykami wczytanego drzewa: największe pliki i foldery, rozkład rozmiaru według typu pliku (wykres), liczba plików na poziomie zagnieżdżenia, puste foldery.
 - **Wyszukiwanie rozmyte** i tryb filtrowania drzewa (pokazanie tylko gałęzi z wynikami).
+
+### Bezpieczeństwo
+
+- **Limit rozmiaru pliku** i liczby węzłów przed parsowaniem, z czytelnym komunikatem.
+- **Nagłówki HTTP** na serwerze: Content Security Policy, `X-Content-Type-Options`, `Referrer-Policy`.
+- **Automatyczny audyt zależności** w CI (`npm audit`, Dependabot).
+- **Migracja na React Router v7**, gdy wymaganie v6 przestanie obowiązywać. Usuwa to obie znane podatności.
+
+### Backend z bazą danych i AWS
+
+Teraz dane są tylko w przeglądarce. Backend umożliwiłby pracę na wielu urządzeniach i udostępnianie drzew innym osobom.
+
+- **Logowanie i konta użytkowników**, np. AWS Cognito albo OAuth (GitHub, Google). Każdy użytkownik widzi tylko swoje pliki.
+- **Zarządzanie plikami JSON:** lista zapisanych drzew, dodawanie, zmiana nazwy, usuwanie, historia wersji i udostępnianie linkiem.
+- **Pliki JSON w Amazon S3, a w bazie danych tylko metadane** (właściciel, nazwa, rozmiar, data, liczba węzłów, klucz pliku w S3). Duże pliki nie obciążają bazy danych ani pamięci przeglądarki. Upload i pobieranie przez krótkoterminowe linki S3 (presigned URL), więc plik nie przechodzi przez serwer API.
+- **API** (np. Node.js z NestJS albo Fastify) z bazą PostgreSQL (Amazon RDS) i walidacją JSON po stronie serwera.
+- **Przetwarzanie dużych plików na serwerze:** budowanie indeksu i wyszukiwanie po stronie API, a w przeglądarce tylko widoczna część drzewa (stronicowanie, ładowanie folderu przy rozwinięciu).
+
+### Wydajność
+
+- **Web Worker** do parsowania i indeksowania, aby interfejs nie zatrzymywał się przy dużych plikach.
+- **IndexedDB zamiast `localStorage`**, aby duże drzewa przetrwały odświeżenie strony (gdy nie ma backendu).
+
+### Testy i infrastruktura
+
+- **Testy E2E (Playwright)** w prawdziwej przeglądarce: pełny przepływ (wklejenie JSON → drzewo → szczegóły), odświeżenie strony z wynikami wyszukiwania, deep link, klawiatura, duże drzewo oraz test dostępności `@axe-core/playwright`.
 - **Testy wizualne** (zrzuty ekranu) i sprawdzenie na urządzeniach mobilnych.
-- **Migracja na React Router v7**, gdy wymaganie v6 przestanie obowiązywać. Usuwa to obie podatności.
+- **Docker:** wieloetapowy `Dockerfile` (build w Node, serwowanie przez nginx z `try_files $uri /index.html`, aby deep linki nie dawały 404) i `docker-compose.yml` (frontend, API, baza danych). W CI: budowanie obrazu i testy E2E na kontenerze.
+- **Wdrożenie na AWS:** frontend w S3 + CloudFront, API w ECS albo Lambda, infrastruktura jako kod (Terraform albo AWS CDK), automatyczne wdrożenie z GitHub Actions.
