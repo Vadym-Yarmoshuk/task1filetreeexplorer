@@ -1,0 +1,7 @@
+{
+  "name": "root",
+  "type": "folder",
+  "children": [
+    { "name": "a.txt", "type": "file", "size": 10, }
+  ]
+}

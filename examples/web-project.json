@@ -1,0 +1,313 @@
+{
+  "name": "my-web-app",
+  "type": "folder",
+  "children": [
+    {
+      "name": ".github",
+      "type": "folder",
+      "children": [
+        {
+          "name": "workflows",
+          "type": "folder",
+          "children": [
+            {
+              "name": "ci.yml",
+              "type": "file",
+              "size": 1843
+            },
+            {
+              "name": "deploy.yml",
+              "type": "file",
+              "size": 2210
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public",
+      "type": "folder",
+      "children": [
+        {
+          "name": "favicon.ico",
+          "type": "file",
+          "size": 15086
+        },
+        {
+          "name": "robots.txt",
+          "type": "file",
+          "size": 67
+        },
+        {
+          "name": "images",
+          "type": "folder",
+          "children": [
+            {
+              "name": "logo.svg",
+              "type": "file",
+              "size": 4210
+            },
+            {
+              "name": "hero.webp",
+              "type": "file",
+              "size": 284512
+            },
+            {
+              "name": "team photo.jpg",
+              "type": "file",
+              "size": 1843200
+            }
+          ]
+        },
+        {
+          "name": "videos",
+          "type": "folder",
+          "children": [
+            {
+              "name": "intro.mp4",
+              "type": "file",
+              "size": 24117248
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "src",
+      "type": "folder",
+      "children": [
+        {
+          "name": "main.tsx",
+          "type": "file",
+          "size": 412
+        },
+        {
+          "name": "App.tsx",
+          "type": "file",
+          "size": 1890
+        },
+        {
+          "name": "index.css",
+          "type": "file",
+          "size": 2304
+        },
+        {
+          "name": "components",
+          "type": "folder",
+          "children": [
+            {
+              "name": "Button",
+              "type": "folder",
+              "children": [
+                {
+                  "name": "Button.tsx",
+                  "type": "file",
+                  "size": 1536
+                },
+                {
+                  "name": "Button.test.tsx",
+                  "type": "file",
+                  "size": 2048
+                },
+                {
+                  "name": "index.ts",
+                  "type": "file",
+                  "size": 41
+                }
+              ]
+            },
+            {
+              "name": "Modal",
+              "type": "folder",
+              "children": [
+                {
+                  "name": "Modal.tsx",
+                  "type": "file",
+                  "size": 3584
+                },
+                {
+                  "name": "Modal.test.tsx",
+                  "type": "file",
+                  "size": 2867
+                },
+                {
+                  "name": "index.ts",
+                  "type": "file",
+                  "size": 39
+                }
+              ]
+            },
+            {
+              "name": "Header",
+              "type": "folder",
+              "children": [
+                {
+                  "name": "Header.tsx",
+                  "type": "file",
+                  "size": 2150
+                },
+                {
+                  "name": "index.ts",
+                  "type": "file",
+                  "size": 40
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "pages",
+          "type": "folder",
+          "children": [
+            {
+              "name": "HomePage.tsx",
+              "type": "file",
+              "size": 4096
+            },
+            {
+              "name": "SettingsPage.tsx",
+              "type": "file",
+              "size": 6144
+            },
+            {
+              "name": "NotFoundPage.tsx",
+              "type": "file",
+              "size": 870
+            }
+          ]
+        },
+        {
+          "name": "hooks",
+          "type": "folder",
+          "children": [
+            {
+              "name": "useAuth.ts",
+              "type": "file",
+              "size": 2560
+            },
+            {
+              "name": "useDebounce.ts",
+              "type": "file",
+              "size": 498
+            }
+          ]
+        },
+        {
+          "name": "services",
+          "type": "folder",
+          "children": [
+            {
+              "name": "api",
+              "type": "folder",
+              "children": [
+                {
+                  "name": "client.ts",
+                  "type": "file",
+                  "size": 3200
+                },
+                {
+                  "name": "users.ts",
+                  "type": "file",
+                  "size": 1750
+                },
+                {
+                  "name": "orders.ts",
+                  "type": "file",
+                  "size": 2210
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "i18n",
+          "type": "folder",
+          "children": [
+            {
+              "name": "pl.json",
+              "type": "file",
+              "size": 8420
+            },
+            {
+              "name": "en.json",
+              "type": "file",
+              "size": 7980
+            },
+            {
+              "name": "zażółć gęślą jaźń.txt",
+              "type": "file",
+              "size": 37
+            }
+          ]
+        },
+        {
+          "name": "utils",
+          "type": "folder",
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "docs",
+      "type": "folder",
+      "children": [
+        {
+          "name": "README.md",
+          "type": "file",
+          "size": 5120
+        },
+        {
+          "name": "CHANGELOG.md",
+          "type": "file",
+          "size": 12800
+        },
+        {
+          "name": "architecture",
+          "type": "folder",
+          "children": [
+            {
+              "name": "overview.md",
+              "type": "file",
+              "size": 3300
+            },
+            {
+              "name": "diagram #1.png",
+              "type": "file",
+              "size": 512000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": ".gitignore",
+      "type": "file",
+      "size": 253
+    },
+    {
+      "name": ".env.example",
+      "type": "file",
+      "size": 0
+    },
+    {
+      "name": "package.json",
+      "type": "file",
+      "size": 1450
+    },
+    {
+      "name": "package-lock.json",
+      "type": "file",
+      "size": 312560
+    },
+    {
+      "name": "tsconfig.json",
+      "type": "file",
+      "size": 655
+    },
+    {
+      "name": "vite.config.ts",
+      "type": "file",
+      "size": 161
+    }
+  ]
+}

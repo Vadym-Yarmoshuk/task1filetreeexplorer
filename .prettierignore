@@ -1,0 +1,6 @@
+dist
+coverage
+package-lock.json
+# Intentionally broken examples
+examples/invalid-*.json
+examples/generated

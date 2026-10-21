@@ -1,0 +1,21 @@
+{
+  "name": "root",
+  "type": "folder",
+  "children": [
+    {
+      "name": "src",
+      "type": "folder",
+      "children": [
+        {
+          "name": "index.ts",
+          "type": "file",
+          "size": 1024
+        },
+        {
+          "name": "App.tsx",
+          "type": "file"
+        }
+      ]
+    }
+  ]
+}
