@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, useLocation, type Location } from 'react-router-dom';
+import { MemoryRouter, parsePath, useLocation, type Location } from 'react-router-dom';
 import { App } from '../app/App';
 import { AppProviders } from '../app/AppProviders';
 import { TREE_STORAGE_KEY } from '../store/treeStorage';
@@ -12,14 +12,16 @@ interface RenderAppOptions {
   route?: string;
   /** Tree saved in localStorage before the first render. */
   storedTree?: FolderNode;
+  /** Router state of the start URL (location.state). */
+  routerState?: unknown;
 }
 
 /**
  * Renders the whole application in a memory router.
- * @param options - Start URL and saved tree.
+ * @param options - Start URL, its router state and saved tree.
  * @returns Testing Library result, a user-event instance and a getter for the current location.
  */
-export function renderApp({ route = '/', storedTree }: RenderAppOptions = {}) {
+export function renderApp({ route = '/', storedTree, routerState }: RenderAppOptions = {}) {
   if (storedTree) {
     localStorage.setItem(TREE_STORAGE_KEY, JSON.stringify(storedTree));
   }
@@ -37,7 +39,7 @@ export function renderApp({ route = '/', storedTree }: RenderAppOptions = {}) {
   const user = userEvent.setup();
   const result = render(
     <MemoryRouter
-      initialEntries={[route]}
+      initialEntries={[{ ...parsePath(route), state: routerState }]}
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
       <AppProviders>

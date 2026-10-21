@@ -99,6 +99,16 @@ describe('parseTreeJson', () => {
       /powtarza/,
     ],
     [
+      '{"name":"r","type":"folder","children":[{"name":".","type":"file","size":1}]}',
+      '$.children[0]',
+      /niedozwolona/,
+    ],
+    [
+      '{"name":"r","type":"folder","children":[{"name":"..","type":"file","size":1}]}',
+      '$.children[0]',
+      /niedozwolona/,
+    ],
+    [
       '{"name":"r","type":"folder","children":[{"name":"s","type":"folder","children":[{"name":"x","type":"file","size":1},{"name":"y","type":"file"}]}]}',
       '$.children[0].children[1]',
       /"size"/,
@@ -107,6 +117,10 @@ describe('parseTreeJson', () => {
     const error = errorOf(text);
     expect(error.location).toBe(location);
     expect(error.message).toMatch(message);
+  });
+
+  it('allows "." as the root name, because the root is not part of any path', () => {
+    expect(parseTreeJson('{"name":".","type":"folder","children":[]}').ok).toBe(true);
   });
 
   it('allows the same name in different folders', () => {

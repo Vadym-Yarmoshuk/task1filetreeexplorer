@@ -79,7 +79,7 @@ Zadanie mówi o strukturze „dowolnie głęboko zagnieżdżonej”. Walidacja, 
 
 Na początku planowałem `zod`. Test pokazał, że rekurencyjny schemat zod przepełnia stos już przy głębokości 1000. Własny walidator ([`parseTree.ts`](src/domain/parseTree.ts)) działa iteracyjnie i zwraca komunikat po polsku z lokalizacją błędu, np. „Plik "App.tsx": pole "size" musi być liczbą większą lub równą 0.” w `$.children[0].children[1]`.
 
-Walidator odrzuca też dwa węzły o tej samej nazwie w jednym folderze i nazwy ze znakiem `/`. Bez tego ścieżka w URL mogłaby wskazywać więcej niż jeden węzeł.
+Walidator odrzuca też dwa węzły o tej samej nazwie w jednym folderze i nazwy ze znakiem `/`. Bez tego ścieżka w URL mogłaby wskazywać więcej niż jeden węzeł. Odrzuca też nazwy `.` i `..` (poza korzeniem), bo przeglądarka traktuje je w URL jako kroki w katalogach.
 
 ### Wirtualizacja
 
@@ -120,13 +120,13 @@ src/
 
 - **TypeScript `strict`** i `noUncheckedIndexedAccess`.
 - **JSDoc** (opis, `@param`, `@returns`) dla każdej funkcji, hooka i komponentu. ESLint (`eslint-plugin-jsdoc`) zgłasza brak opisu.
-- **202 testy** (Vitest + React Testing Library). Pokrycie: około 97% całości i 100% linii w `domain/`. Progi pokrycia: 90% dla `domain/`, 70% dla całości.
+- **211 testów** (Vitest + React Testing Library). Pokrycie: około 97% całości i 100% linii w `domain/`. Progi pokrycia: 90% dla `domain/`, 70% dla całości.
 - **CI** w GitHub Actions ([`ci.yml`](.github/workflows/ci.yml)): Prettier, ESLint, typecheck, testy z pokryciem i build przy każdym `push` i pull requeście.
 - **Interfejs po polsku**, z poprawną odmianą liczebników („1 plik”, „3 pliki”, „5 plików”).
 
 ## Znane ograniczenia
 
-- **Nazwy z `/` i duplikaty nazw w jednym folderze są odrzucane.** Bez tego ścieżka nie jest jednoznaczna. Inny format URL (np. indeksy dzieci) by to rozwiązał, ale adres byłby nieczytelny.
+- **Nazwy z `/`, nazwy `.` i `..` oraz duplikaty nazw w jednym folderze są odrzucane.** Bez tego ścieżka nie jest jednoznaczna. Inny format URL (np. indeksy dzieci) by to rozwiązał, ale adres byłby nieczytelny.
 - **Pamięć przy bardzo głębokim drzewie.** Każdy węzeł przechowuje pełną ścieżkę, więc przy tysiącach poziomów zużycie pamięci rośnie kwadratowo, a URL szczegółów jest bardzo długi.
 - **Limit `localStorage` (około 5 MB).** Większy JSON działa, ale nie przetrwa odświeżenia strony. Aplikacja pokazuje wtedy ostrzeżenie.
 - **Parsowanie i indeksowanie blokują wątek główny.** Dla 55 555 węzłów trwa to krótko, ale dla plików rzędu setek MB interfejs na chwilę się zatrzyma.

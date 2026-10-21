@@ -1,6 +1,14 @@
 import Box from '@mui/material/Box';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useCallback, useEffect, useId, useMemo, useRef, type KeyboardEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  type KeyboardEvent,
+  type RefObject,
+} from 'react';
 import { flattenVisible } from '../../domain/flattenVisible';
 import { getAncestorPaths } from '../../domain/paths';
 import type { IndexedNode, TreeIndex } from '../../domain/types';
@@ -14,6 +22,8 @@ const OVERSCAN = 10;
 /** Props for {@link VirtualTree}. */
 interface VirtualTreeProps {
   index: TreeIndex;
+  /** Ref to the focusable tree element, so the parent can move keyboard focus to it. */
+  treeRef?: RefObject<HTMLDivElement | null>;
   /** Expanded folders and the functions that change them. */
   expandedState: ExpandedState;
   /** Path of the node with keyboard focus. */
@@ -56,6 +66,7 @@ function resolveFocusedRow(rowByPath: ReadonlyMap<string, number>, path: string)
  */
 export function VirtualTree({
   index,
+  treeRef,
   expandedState,
   focusedPath,
   onFocusChange,
@@ -64,11 +75,21 @@ export function VirtualTree({
 }: VirtualTreeProps) {
   const { expanded, toggle, expand, collapse } = expandedState;
   const idPrefix = useId();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const ownRef = useRef<HTMLDivElement>(null);
+  const scrollRef = treeRef ?? ownRef;
 
   const rows = useMemo(() => flattenVisible(index, expanded), [index, expanded]);
   const rowByPath = useMemo(() => new Map(rows.map((node, row) => [node.path, row])), [rows]);
   const focusedRow = resolveFocusedRow(rowByPath, focusedPath);
+  const focusedRowPath = rows[focusedRow]?.path;
+
+  // When the focused node is hidden by a collapse, focus moves to the visible ancestor.
+  // Without this, expanding the folder again would move focus back down without user input.
+  useEffect(() => {
+    if (focusedRowPath !== undefined && focusedRowPath !== focusedPath) {
+      onFocusChange(focusedRowPath);
+    }
+  }, [focusedRowPath, focusedPath, onFocusChange]);
 
   // The project does not use React Compiler. Rows get only plain numbers from the virtualizer.
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -95,7 +116,18 @@ export function VirtualTree({
         onOpen(node.path);
       }
     },
-    [onFocusChange, onOpen, toggle],
+    [onFocusChange, onOpen, toggle, scrollRef],
+  );
+
+  // The expand arrow also moves focus to its folder. Otherwise the list could scroll back
+  // to the old focused row when rows above it appear or disappear.
+  const handleToggle = useCallback(
+    (path: string) => {
+      onFocusChange(path);
+      scrollRef.current?.focus();
+      toggle(path);
+    },
+    [onFocusChange, toggle, scrollRef],
   );
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -161,7 +193,7 @@ export function VirtualTree({
               isFocused={item.index === focusedRow}
               top={item.start}
               onRowClick={handleRowClick}
-              onToggle={toggle}
+              onToggle={handleToggle}
             />
           );
         })}

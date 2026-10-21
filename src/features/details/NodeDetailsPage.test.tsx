@@ -93,6 +93,15 @@ describe('NodeDetailsPage', () => {
     expect(activeRow).toHaveAttribute('aria-label', 'Button.tsx, 512 B');
   });
 
+  it('moves keyboard focus to the heading when another node opens', async () => {
+    const { user } = renderApp({ route: detailsUrl('src'), storedTree: SAMPLE_TREE });
+    expect(screen.getByRole('heading', { level: 1, name: 'src' })).toHaveFocus();
+
+    const list = screen.getByRole('list', { name: 'Zawartość folderu src' });
+    await user.click(within(list).getByRole('link', { name: /^components/ }));
+    expect(screen.getByRole('heading', { level: 1, name: 'components' })).toHaveFocus();
+  });
+
   it('links a top-level node to the tree as its parent', () => {
     renderApp({ route: detailsUrl('package.json'), storedTree: SAMPLE_TREE });
     expect(screen.getByRole('link', { name: 'Folder nadrzędny' })).toHaveAttribute('href', '/tree');

@@ -72,6 +72,11 @@ export function validateTree(data: unknown): ParseTreeResult {
       return failure(`Nazwa "${name}" nie może zawierać znaku "${PATH_SEPARATOR}".`, location);
     }
     if (siblingNames) {
+      // The browser treats "." and ".." in a URL as directory steps, so such a node
+      // could not be opened. The root name is not part of the path, so it may be ".".
+      if (name === '.' || name === '..') {
+        return failure(`Nazwa "${name}" jest niedozwolona.`, location);
+      }
       if (siblingNames.has(name)) {
         return failure(`Nazwa "${name}" powtarza się w tym samym folderze.`, location);
       }

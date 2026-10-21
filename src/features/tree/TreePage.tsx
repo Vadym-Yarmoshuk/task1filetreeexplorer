@@ -4,14 +4,15 @@ import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { detailsUrl, NODE_PARAM } from '../../app/routes';
 import { useDocumentTitle } from '../../app/useDocumentTitle';
 import { formatSize } from '../../domain/formatSize';
-import { ROOT_PATH } from '../../domain/paths';
+import { getAncestorPaths, ROOT_PATH } from '../../domain/paths';
 import { FILE_FORMS, FOLDER_FORMS, pluralize } from '../../domain/plural';
 import type { TreeIndex } from '../../domain/types';
+import { loadFocusedPath, saveFocusedPath } from '../../store/expandedStorage';
 import { useTreeData } from '../../store/useTreeData';
 import { SearchBar } from '../search/SearchBar';
 import { SearchResults } from '../search/SearchResults';
@@ -25,21 +26,28 @@ import { VirtualTree } from './VirtualTree';
  */
 export function TreePage() {
   const { index } = useTreeData();
-  const [searchParams] = useSearchParams();
-  const revealParam = searchParams.get(NODE_PARAM);
   // RequireTree renders this page only when a tree is loaded.
-  const revealPath =
-    revealParam !== null && index!.nodes.has(revealParam) ? revealParam : ROOT_PATH;
-  // A new node to reveal mounts the view again, so it expands the ancestors and moves focus.
-  // Expanded folders survive, because they are kept in sessionStorage.
-  return <TreeView key={revealPath} index={index!} revealPath={revealPath} />;
+  return <TreeView index={index!} />;
 }
 
 /** Props for {@link TreeView}. */
 interface TreeViewProps {
   index: TreeIndex;
-  /** Path of the node to reveal and focus on mount. */
-  revealPath: string;
+}
+
+/**
+ * Returns the path to focus when the tree opens: the node from ?node=, else the node
+ * focused before (for example before opening details), else the root.
+ * @param index - Tree index.
+ * @param revealPath - Valid path from ?node=, or null.
+ * @returns Path of an existing node.
+ */
+function getInitialFocus(index: TreeIndex, revealPath: string | null): string {
+  if (revealPath !== null) {
+    return revealPath;
+  }
+  const saved = loadFocusedPath();
+  return saved !== null && index.nodes.has(saved) ? saved : ROOT_PATH;
 }
 
 /**
@@ -47,13 +55,47 @@ interface TreeViewProps {
  * @param props - Component props.
  * @returns The tree header, toolbar and virtualized tree.
  */
-function TreeView({ index, revealPath }: TreeViewProps) {
+function TreeView({ index }: TreeViewProps) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useSearchQuery();
   const isSearching = query.trim() !== '';
   useDocumentTitle(isSearching ? `Szukaj: ${query.trim()}` : 'Drzewo');
-  const expandedState = useExpandedState(index, revealPath);
-  const [focusedPath, setFocusedPath] = useState(revealPath);
+
+  const revealParam = searchParams.get(NODE_PARAM);
+  const revealPath = revealParam !== null && index.nodes.has(revealParam) ? revealParam : null;
+  const [initialFocus] = useState(() => getInitialFocus(index, revealPath));
+  const expandedState = useExpandedState(index, initialFocus);
+  const [focusedPath, setFocusedPath] = useState(initialFocus);
+  const treeRef = useRef<HTMLDivElement>(null);
+  const { expand } = expandedState;
+
+  useEffect(() => {
+    saveFocusedPath(focusedPath);
+  }, [focusedPath]);
+
+  // ?node= is a one-time command: reveal the node, move keyboard focus to the tree,
+  // then remove the parameter, so "back" from details does not reveal the node again.
+  useEffect(() => {
+    if (revealParam === null) {
+      return;
+    }
+    if (revealPath !== null) {
+      expand(getAncestorPaths(revealPath));
+      // Syncs state with a URL command. The parameter is removed below, so this runs once.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFocusedPath(revealPath);
+      treeRef.current?.focus();
+    }
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        next.delete(NODE_PARAM);
+        return next;
+      },
+      { replace: true },
+    );
+  }, [revealParam, revealPath, expand, setSearchParams]);
 
   const handleOpen = useCallback(
     (path: string) => {
@@ -115,6 +157,7 @@ function TreeView({ index, revealPath }: TreeViewProps) {
         >
           <VirtualTree
             index={index}
+            treeRef={treeRef}
             expandedState={expandedState}
             focusedPath={focusedPath}
             onFocusChange={setFocusedPath}

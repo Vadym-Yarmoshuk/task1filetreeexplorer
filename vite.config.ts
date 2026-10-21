@@ -4,6 +4,22 @@ import { defineConfig } from 'vitest/config';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rolldownOptions: {
+      output: {
+        // Libraries change less often than the app code, so the browser can keep them in cache.
+        codeSplitting: {
+          groups: [
+            { name: 'mui', test: /node_modules[\\/](@mui|@emotion)[\\/]/ },
+            {
+              name: 'react',
+              test: /node_modules[\\/](react|react-dom|react-router|scheduler)[\\/]/,
+            },
+          ],
+        },
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],

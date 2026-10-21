@@ -11,7 +11,7 @@ import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { detailsUrl, treeUrl } from '../../app/routes';
 import { useDocumentTitle } from '../../app/useDocumentTitle';
@@ -40,7 +40,8 @@ export function NodeDetailsPage() {
   if (!node) {
     return <NodeNotFound path={path} />;
   }
-  return <NodeDetails index={index!} node={node} />;
+  // A new key for each node resets the state and the scroll position of the children list.
+  return <NodeDetails key={node.path} index={index!} node={node} />;
 }
 
 /** Props for {@link NodeDetails}. */
@@ -56,7 +57,15 @@ interface NodeDetailsProps {
  */
 function NodeDetails({ index, node }: NodeDetailsProps) {
   const [isCopied, setIsCopied] = useState(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const isFolder = node.type === 'folder';
+
+  // After navigation the clicked link is gone, so focus would fall to <body>.
+  // Move it to the heading and show the page from the top.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    headingRef.current?.focus();
+  }, []);
   const fullPath = toDisplayPath(index.root.name, node.path);
 
   const copyPath = async () => {
@@ -103,7 +112,13 @@ function NodeDetails({ index, node }: NodeDetailsProps) {
 
       <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', minWidth: 0 }}>
         <NodeIcon type={node.type} fontSize="large" />
-        <Typography variant="h4" component="h1" sx={{ overflowWrap: 'anywhere', minWidth: 0 }}>
+        <Typography
+          ref={headingRef}
+          tabIndex={-1}
+          variant="h4"
+          component="h1"
+          sx={{ overflowWrap: 'anywhere', minWidth: 0, outline: 'none' }}
+        >
           {node.name}
         </Typography>
         <Chip label={isFolder ? 'Folder' : 'Plik'} size="small" variant="outlined" />

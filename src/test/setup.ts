@@ -14,3 +14,6 @@ Object.defineProperties(HTMLElement.prototype, {
   clientHeight: { configurable: true, get: () => 600 },
   clientWidth: { configurable: true, get: () => 800 },
 });
+
+// jsdom does not implement scrolling the window.
+window.scrollTo = () => {};

@@ -61,7 +61,13 @@ export function HomePage() {
       return;
     }
     setLoadError(null);
-    navigate(redirectFrom ?? '/tree');
+    // Return to the requested address only for the first tree. "replace" removes this
+    // home page entry, so after "back" the old address is not used for another tree.
+    if (redirectFrom && !index) {
+      navigate(redirectFrom, { replace: true });
+    } else {
+      navigate('/tree');
+    }
   };
 
   const handleSubmit = (event: FormEvent) => {
@@ -75,7 +81,15 @@ export function HomePage() {
       setLoadError({ title: errorTitle, error: { message: 'Plik jest większy niż 50 MB.' } });
       return;
     }
-    load(await file.text(), errorTitle);
+    let json: string;
+    try {
+      json = await file.text();
+    } catch {
+      // For example, the file was moved or deleted after it was selected.
+      setLoadError({ title: errorTitle, error: { message: 'Nie można odczytać pliku.' } });
+      return;
+    }
+    load(json, errorTitle);
   };
 
   const handleLargeExample = () => {

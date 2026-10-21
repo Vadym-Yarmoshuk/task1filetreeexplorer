@@ -112,6 +112,40 @@ describe('TreePage', () => {
     expect(activeRow()).toBe(row('Button.tsx'));
   });
 
+  it('restores the focused node when the user comes back from details', async () => {
+    const first = renderApp({ route: '/tree', storedTree: SAMPLE_TREE });
+    await first.user.click(row('src'));
+    await first.user.click(row('index.ts'));
+    expect(first.location().pathname).toBe('/tree/src%2Findex.ts');
+    first.unmount();
+
+    // "Back" mounts the tree page again.
+    renderApp({ route: '/tree' });
+    expect(activeRow()).toBe(row('index.ts'));
+  });
+
+  it('keeps focus on a folder that the user expands again', async () => {
+    const { user } = renderApp({ route: '/tree?node=src%2Findex.ts', storedTree: SAMPLE_TREE });
+    expect(activeRow()).toBe(row('index.ts'));
+
+    await user.click(screen.getByRole('button', { name: 'Zwiń wszystko' }));
+    expect(activeRow()).toBe(row('src'));
+
+    screen.getByRole('tree').focus();
+    await user.keyboard('{ArrowRight}');
+    expect(row('src')).toHaveAttribute('aria-expanded', 'true');
+    expect(activeRow()).toBe(row('src'));
+  });
+
+  it('moves focus to the folder when the user clicks its arrow', async () => {
+    const { user } = renderApp({ route: '/tree', storedTree: SAMPLE_TREE });
+    expect(activeRow()).toBe(row('root'));
+    await user.click(row('src').querySelector('[aria-hidden="true"]')!);
+    expect(row('src')).toHaveAttribute('aria-expanded', 'true');
+    expect(activeRow()).toBe(row('src'));
+    expect(screen.getByRole('tree')).toHaveFocus();
+  });
+
   it('expands and collapses all folders', async () => {
     const { user } = renderApp({ route: '/tree', storedTree: SAMPLE_TREE });
     await user.click(screen.getByRole('button', { name: 'Rozwiń wszystko' }));

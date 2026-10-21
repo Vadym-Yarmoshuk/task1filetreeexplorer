@@ -56,10 +56,13 @@ describe('search', () => {
   it('shows a result in the tree', async () => {
     const { user, location } = renderApp({ route: '/tree?q=button', storedTree: SAMPLE_TREE });
     await user.click(screen.getByRole('link', { name: 'Pokaż w drzewie: Button.tsx' }));
-    expect(location().search).toBe('?node=src%2Fcomponents%2FButton.tsx');
+    // The ?node= parameter is used once and removed.
+    expect(location().search).toBe('');
     const tree = screen.getByRole('tree');
     const active = document.getElementById(tree.getAttribute('aria-activedescendant')!)!;
     expect(active).toHaveAttribute('aria-label', 'Button.tsx, 512 B');
+    // Keyboard focus moves to the tree, so the arrow keys work at once.
+    expect(tree).toHaveFocus();
   });
 
   it('clears the search with the clear button and shows the tree again', async () => {
@@ -78,10 +81,10 @@ describe('search', () => {
   });
 
   it('saves the query at once on Enter and keeps other parameters', async () => {
-    const { user, location } = renderApp({ route: '/tree?node=src', storedTree: SAMPLE_TREE });
+    const { user, location } = renderApp({ route: '/tree?other=1', storedTree: SAMPLE_TREE });
     await user.type(searchInput(), 'index{Enter}');
     expect(new URLSearchParams(location().search).get('q')).toBe('index');
-    expect(new URLSearchParams(location().search).get('node')).toBe('src');
+    expect(new URLSearchParams(location().search).get('other')).toBe('1');
   });
 
   it('keeps the tree state while searching', async () => {

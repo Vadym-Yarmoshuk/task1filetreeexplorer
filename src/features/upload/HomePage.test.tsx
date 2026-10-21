@@ -27,6 +27,28 @@ describe('HomePage', () => {
     expect(localStorage.getItem(TREE_STORAGE_KEY)).not.toBeNull();
   });
 
+  it('shows an error when the selected file cannot be read', async () => {
+    const { user, location } = renderApp();
+    const file = jsonFile('{}', 'moved.json');
+    Object.defineProperty(file, 'text', { value: () => Promise.reject(new Error('NotFound')) });
+    await user.upload(screen.getByLabelText('Plik JSON'), file);
+    expect(await screen.findByText('Nie można odczytać pliku.')).toBeInTheDocument();
+    expect(location().pathname).toBe('/');
+  });
+
+  it('uses the redirect target only for the first tree', async () => {
+    const { user, location } = renderApp({
+      route: '/',
+      routerState: { from: '/tree/src' },
+      storedTree: SAMPLE_TREE,
+    });
+    fireEvent.change(screen.getByRole('textbox', { name: 'JSON' }), {
+      target: { value: JSON.stringify(SAMPLE_TREE) },
+    });
+    await user.click(screen.getByRole('button', { name: 'Wczytaj' }));
+    expect(location().pathname).toBe('/tree');
+  });
+
   it('shows the validation error with its location', async () => {
     const { user, location } = renderApp();
     fireEvent.change(screen.getByRole('textbox', { name: 'JSON' }), {
